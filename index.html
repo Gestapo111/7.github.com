@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación: QUÍMICA ORGÁNICA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #333;
+        }
+        .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 800px;
+        }
+        .question {
+            margin-bottom: 15px;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #results {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Evaluación: QUÍMICA ORGÁNICA</h1>
+    <div class="quiz-container">
+        <div id="quiz"></div>
+        <button id="submit">Enviar respuestas</button>
+        <div id="results"></div>
+    </div>
+    <footer>
+        &copy; derechos reservados Prof. Alberto Sanchez
+    </footer>
+    <script>
+        const quizData = [
+            {
+                question: "¿Qué es un hidrocarburo?",
+                answers: [
+                    { text: "Un compuesto que contiene solo carbono e hidrógeno.", correct: true },
+                    { text: "Un compuesto que contiene carbono, hidrógeno y oxígeno.", correct: false },
+                    { text: "Un compuesto que contiene nitrógeno y oxígeno.", correct: false },
+                    { text: "Un compuesto que contiene carbono y nitrógeno.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué tipo de enlace es predominante en los compuestos orgánicos?",
+                answers: [
+                    { text: "Enlace iónico.", correct: false },
+                    { text: "Enlace covalente.", correct: true },
+                    { text: "Enlace metálico.", correct: false },
+                    { text: "Enlace de hidrógeno.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la isomería?",
+                answers: [
+                    { text: "Compuestos con la misma fórmula molecular pero diferente estructura.", correct: true },
+                    { text: "Compuestos con diferentes fórmulas moleculares pero misma estructura.", correct: false },
+                    { text: "Compuestos con la misma masa molar.", correct: false },
+                    { text: "Compuestos con diferentes masas molares.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un alcano?",
+                answers: [
+                    { text: "Un hidrocarburo con enlaces simples entre carbonos.", correct: true },
+                    { text: "Un hidrocarburo con enlaces dobles entre carbonos.", correct: false },
+                    { text: "Un hidrocarburo con enlaces triples entre carbonos.", correct: false },
+                    { text: "Un hidrocarburo aromático.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un alqueno?",
+                answers: [
+                    { text: "Un hidrocarburo con enlaces dobles entre carbonos.", correct: true },
+                    { text: "Un hidrocarburo con enlaces simples entre carbonos.", correct: false },
+                    { text: "Un hidrocarburo con enlaces triples entre carbonos.", correct: false },
+                    { text: "Un hidrocarburo aromático.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un alquino?",
+                answers: [
+                    { text: "Un hidrocarburo con enlaces triples entre carbonos.", correct: true },
+                    { text: "Un hidrocarburo con enlaces dobles entre carbonos.", correct: false },
+                    { text: "Un hidrocarburo con enlaces simples entre carbonos.", correct: false },
+                    { text: "Un hidrocarburo aromático.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un hidrocarburo aromático?",
+                answers: [
+                    { text: "Un hidrocarburo con uno o más anillos bencénicos.", correct: true },
+                    { text: "Un hidrocarburo con enlaces simples entre carbonos.", correct: false },
+                    { text: "Un hidrocarburo con enlaces dobles entre carbonos.", correct: false },
+                    { text: "Un hidrocarburo con enlaces triples entre carbonos.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un grupo funcional?",
+                answers: [
+                    { text: "Un grupo de átomos que confiere propiedades químicas específicas a una molécula orgánica.", correct: true },
+                    { text: "Un grupo de átomos que no tiene ningún efecto sobre las propiedades químicas de una molécula orgánica.", correct: false },
+                    { text: "Un grupo de átomos que cambia la masa molar de una molécula orgánica.", correct: false },
+                    { text: "Un grupo de átomos que no está presente en los compuestos orgánicos.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un alcohol?",
+                answers: [
+                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: true },
+                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a un átomo de carbono.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un aldehído?",
+                answers: [
+                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a un átomo de carbono y un átomo de hidrógeno.", correct: true },
+                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es una cetona?",
+                answers: [
+                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a dos átomos de carbono.", correct: true },
+                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un ácido carboxílico?",
+                answers: [
+                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: true },
+                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a un átomo de carbono y un átomo de hidrógeno.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un éster?",
+                answers: [
+                    { text: "Un compuesto orgánico que se forma por la reacción de un ácido carboxílico y un alcohol.", correct: true },
+                    { text: "Un compuesto orgánico que se forma por la reacción de un aldehído y un alcohol.", correct: false },
+                    { text: "Un compuesto orgánico que se forma por la reacción de una cetona y un alcohol.", correct: false },
+                    { text: "Un compuesto orgánico que se forma por la reacción de un ácido carboxílico y una cetona.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es una amina?",
+                answers: [
+                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: true },
+                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a un átomo de carbono y un átomo de hidrógeno.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un nitrilo?",
+                answers: [
+                    { text: "Un compuesto orgánico que contiene un grupo ciano (-CN) unido a un átomo de carbono.", correct: true },
+                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un éter?",
+                answers: [
+                    { text: "Un compuesto orgánico que contiene un átomo de oxígeno unido a dos átomos de carbono.", correct: true },
+                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
+                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es una amida?",
+                answers: [
+                    { text: "Un compuesto orgánico que se forma por la reacción de un ácido carboxílico y una amina.", correct: true },
+                    { text: "Un compuesto orgánico que se forma por la reacción de un aldehído y una amina.", correct: false },
+                    { text: "Un compuesto orgánico que se forma por la reacción de una cetona y una amina.", correct: false },
+                    { text: "Un compuesto orgánico que se forma por la reacción de un ácido carboxílico y una cetona.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es la polimerización?",
+                answers: [
+                    { text: "Un proceso en el cual pequeñas moléculas (monómeros) se unen para formar grandes moléculas (polímeros).", correct: true },
+                    { text: "Un proceso en el cual grandes moléculas (polímeros) se descomponen en pequeñas moléculas (monómeros).", correct: false },
+                    { text: "Un proceso en el cual pequeñas moléculas (monómeros) se descomponen en grandes moléculas (polímeros).", correct: false },
+                    { text: "Un proceso en el cual grandes moléculas (polímeros) se unen para formar pequeñas moléculas (monómeros).", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es un polímero?",
+                answers: [
+                    { text: "Una gran molécula formada por la unión repetida de monómeros.", correct: true },
+                    { text: "Una pequeña molécula formada por la unión repetida de polímeros.", correct: false },
+                    { text: "Una gran molécula formada por la descomposición repetida de monómeros.", correct: false },
+                    { text: "Una pequeña molécula formada por la descomposición repetida de polímeros.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es una reacción de adición?",
+                answers: [
+                    { text: "Una reacción en la cual dos o más moléculas se combinan para formar una sola molécula.", correct: true },
+                    { text: "Una reacción en la cual una molécula se descompone en dos o más moléculas más pequeñas.", correct: false },
+                    { text: "Una reacción en la cual una molécula se convierte en dos o más isómeros.", correct: false },
+                    { text: "Una reacción en la cual una molécula se oxida y otra se reduce.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es una reacción de eliminación?",
+                answers: [
+                    { text: "Una reacción en la cual una molécula se descompone en dos o más moléculas más pequeñas.", correct: true },
+                    { text: "Una reacción en la cual dos o más moléculas se combinan para formar una sola molécula.", correct: false },
+                    { text: "Una reacción en la cual una molécula se convierte en dos o más isómeros.", correct: false },
+                    { text: "Una reacción en la cual una molécula se oxida y otra se reduce.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es una reacción de sustitución?",
+                answers: [
+                    { text: "Una reacción en la cual un átomo o grupo de átomos en una molécula es reemplazado por otro átomo o grupo de átomos.", correct: true },
+                    { text: "Una reacción en la cual una molécula se descompone en dos o más moléculas más pequeñas.", correct: false },
+                    { text: "Una reacción en la cual dos o más moléculas se combinan para formar una sola molécula.", correct: false },
+                    { text: "Una reacción en la cual una molécula se convierte en dos o más isómeros.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es una reacción de condensación?",
+                answers: [
+                    { text: "Una reacción en la cual dos moléculas se combinan para formar una sola molécula con la eliminación de una pequeña molécula, como agua.", correct: true },
+                    { text: "Una reacción en la cual una molécula se descompone en dos o más moléculas más pequeñas.", correct: false },
+                    { text: "Una reacción en la cual dos o más moléculas se combinan para formar una sola molécula sin la eliminación de una pequeña molécula.", correct: false },
+                    { text: "Una reacción en la cual una molécula se convierte en dos o más isómeros.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es una reacción de oxidación?",
+                answers: [
+                    { text: "Una reacción en la cual una sustancia pierde electrones.", correct: true },
+                    { text: "Una reacción en la cual una sustancia gana electrones.", correct: false },
+                    { text: "Una reacción en la cual una sustancia gana protones.", correct: false },
+                    { text: "Una reacción en la cual una sustancia pierde protones.", correct: false }
+                ]
+            },
+            {
+                question: "¿Qué es una reacción de reducción?",
+                answers: [
+                    { text: "Una reacción en la cual una sustancia gana electrones.", correct: true },
+                    { text: "Una reacción en la cual una sustancia pierde electrones.", correct: false },
+                    { text: "Una reacción en la cual una sustancia gana protones.", correct: false },
+                    { text: "Una reacción en la cual una sustancia pierde protones.", correct: false }
+                ]
+            }
+        ];
+
+        let attempt = 0;
+        const maxAttempts = 3;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function loadQuiz() {
+            const quizContainer = document.getElementById('quiz');
+            quizContainer.innerHTML = '';
+            quizData.forEach((data, index) => {
+                const questionContainer = document.createElement('div');
+                questionContainer.className = 'question';
+
+                const questionTitle = document.createElement('h3');
+                questionTitle.innerText = `${index + 1}. ${data.question}`;
+                questionContainer.appendChild(questionTitle);
+
+                const optionsList = document.createElement('ul');
+                optionsList.className = 'options';
+
+                shuffle(data.answers).forEach(answer => {
+                    const option = document.createElement('li');
+                    const optionLabel = document.createElement('label');
+                    const optionInput = document.createElement('input');
+                    optionInput.type = 'radio';
+                    optionInput.name = `question${index}`;
+                    optionInput.value = answer.correct;
+                    optionLabel.appendChild(optionInput);
+                    optionLabel.appendChild(document.createTextNode(answer.text));
+                    option.appendChild(optionLabel);
+                    optionsList.appendChild(option);
+                });
+
+                questionContainer.appendChild(optionsList);
+                quizContainer.appendChild(questionContainer);
+            });
+        }
+
+        function submitQuiz() {
+            if (attempt >= maxAttempts) {
+                alert('Has alcanzado el número máximo de intentos.');
+                return;
+            }
+
+            const resultsContainer = document.getElementById('results');
+            const answers = document.querySelectorAll('input[type="radio"]:checked');
+            let score = 0;
+
+            quizData.forEach((data, index) => {
+                const selected = answers[index] ? answers[index].value === 'true' : null;
+                if (selected === true) {
+                    score += 0.4; // Each correct answer is worth 0.4 points
+                }
+            });
+
+            score = Math.round(score * 10) / 10; // Round to one decimal place
+            let feedback = quizData.map((data, index) => {
+                const selected = answers[index] ? answers[index].value === 'true' : null;
+                let result;
+                if (selected === null) {
+                    result = "No contestada";
+                } else if (selected === true) {
+                    result = "Correcta";
+                } else {
+                    result = "Incorrecta";
+                }
+                return `<p>${index + 1}. ${result}</p>`;
+            }).join("");
+
+            resultsContainer.innerHTML = `<h3>Resultados:</h3><p>Puntaje: ${score} / 10</p>${feedback}`;
+
+            attempt++;
+            if (attempt >= maxAttempts) {
+                alert('Has alcanzado el número máximo de intentos.');
+            }
+        }
+
+        document.getElementById('submit').addEventListener('click', submitQuiz);
+
+        loadQuiz();
+    </script>
+</body>
+</html>
