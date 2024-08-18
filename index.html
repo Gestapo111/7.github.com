@@ -3,307 +3,560 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluación: QUÍMICA ORGÁNICA</title>
+    <title>Evaluación Unidad 7: Química Orgánica</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        h1 {
-            color: #333;
-        }
-        .quiz-container {
-            background-color: #fff;
             padding: 20px;
-            margin: 20px 0;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 80%;
-            max-width: 800px;
+        }
+        #timer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #f2f2f2;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        .hidden {
+            display: none;
         }
         .question {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
-        .options {
-            list-style-type: none;
-            padding: 0;
-        }
-        .options li {
+        .question h3 {
             margin-bottom: 10px;
         }
-        button {
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
         }
-        button:hover {
-            background-color: #218838;
-        }
-        #results {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-        footer {
-            background-color: #333;
-            color: #fff;
-            padding: 10px;
-            width: 100%;
-            text-align: center;
+        #resultsModal {
+            display: none;
             position: fixed;
-            bottom: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 500;
         }
     </style>
 </head>
 <body>
-    <h1>Evaluación: QUÍMICA ORGÁNICA</h1>
-    <div class="quiz-container">
-        <div id="quiz"></div>
-        <button id="submit">Enviar respuestas</button>
-        <div id="results"></div>
+    <div id="timer" class="hidden">Tiempo restante: <span id="time">30:00</span></div>
+
+    <div class="container">
+        <div id="studentInfoForm">
+            <h2>Información del Estudiante</h2>
+            <form id="infoForm">
+                <label for="name">Nombre del Estudiante:</label>
+                <input type="text" id="name" required><br><br>
+                <label for="nie">NIE:</label>
+                <input type="text" id="nie" required><br><br>
+                <label for="unit">Unidad Evaluada:</label>
+                <input type="text" id="unit" value="Unidad 7: Química Orgánica" readonly><br><br>
+                <button type="submit">Iniciar Evaluación</button>
+            </form>
+        </div>
+
+        <div id="quiz" class="hidden">
+            <h2>Evaluación Unidad 7: Química Orgánica</h2>
+
+            <div id="questions-container"></div>
+
+            <button id="submitQuiz">OBTENER CALIFICACIÓN</button>
+        </div>
+
+        <div id="resultsModal">
+            <h2>Resultados</h2>
+            <p id="date"></p>
+            <p id="timeTaken"></p>
+            <p id="unitEvaluated"></p>
+            <p id="studentName"></p>
+            <p id="studentNIE"></p>
+            <p id="score"></p>
+            <p id="incorrectAnswers"></p>
+            <button id="closeModal">Cerrar</button>
+        </div>
+
+        <div id="overlay"></div>
     </div>
-    <footer>
-        &copy; derechos reservados Prof. Alberto Sanchez
-    </footer>
+
     <script>
-        const quizData = [
+        const nieList = ["4267837", "3850952", "3851018", "5032035", "19806181", "6297536", "2608724", "6262810", "4267838", "20162435", "3850923", "19806209", "4267828", "3850942"];
+        const maxTime = 30 * 60; // 30 minutos en segundos
+        let timeRemaining = maxTime;
+        const timerElement = document.getElementById('time');
+        let startTime;
+
+        const questions = [
+            // Indicador 7.1
             {
-                question: "¿Qué es un hidrocarburo?",
-                answers: [
-                    { text: "Un compuesto que contiene solo carbono e hidrógeno.", correct: true },
-                    { text: "Un compuesto que contiene carbono, hidrógeno y oxígeno.", correct: false },
-                    { text: "Un compuesto que contiene nitrógeno y oxígeno.", correct: false },
-                    { text: "Un compuesto que contiene carbono y nitrógeno.", correct: false }
+                id: 'q1',
+                indicator: 'Indicador 7.1: Describe y representa las características del átomo de carbono y sus aplicaciones en la vida cotidiana.',
+                question: "¿Cuál es la característica principal del átomo de carbono que le permite formar una gran variedad de compuestos?",
+                options: [
+                    { value: 'a', text: "Su capacidad para formar cuatro enlaces covalentes." },
+                    { value: 'b', text: "Su capacidad para formar enlaces iónicos." },
+                    { value: 'c', text: "Su capacidad para formar enlaces metálicos." },
+                    { value: 'd', text: "Su capacidad para formar compuestos inorgánicos." }
                 ]
             },
             {
-                question: "¿Qué tipo de enlace es predominante en los compuestos orgánicos?",
-                answers: [
-                    { text: "Enlace iónico.", correct: false },
-                    { text: "Enlace covalente.", correct: true },
-                    { text: "Enlace metálico.", correct: false },
-                    { text: "Enlace de hidrógeno.", correct: false }
+                id: 'q2',
+                indicator: 'Indicador 7.1: Describe y representa las características del átomo de carbono y sus aplicaciones en la vida cotidiana.',
+                question: "¿Qué tipo de enlaces predominan en los compuestos orgánicos?",
+                options: [
+                    { value: 'a', text: "Enlaces covalentes." },
+                    { value: 'b', text: "Enlaces iónicos." },
+                    { value: 'c', text: "Enlaces metálicos." },
+                    { value: 'd', text: "Enlaces de hidrógeno." }
                 ]
             },
             {
-                question: "¿Qué es la isomería?",
-                answers: [
-                    { text: "Compuestos con la misma fórmula molecular pero diferente estructura.", correct: true },
-                    { text: "Compuestos con diferentes fórmulas moleculares pero misma estructura.", correct: false },
-                    { text: "Compuestos con la misma masa molar.", correct: false },
-                    { text: "Compuestos con diferentes masas molares.", correct: false }
+                id: 'q3',
+                indicator: 'Indicador 7.1: Describe y representa las características del átomo de carbono y sus aplicaciones en la vida cotidiana.',
+                question: "¿Cuál de las siguientes es una aplicación cotidiana del carbono?",
+                options: [
+                    { value: 'a', text: "El grafito en los lápices." },
+                    { value: 'b', text: "La sal de mesa." },
+                    { value: 'c', text: "El cloruro de sodio en detergentes." },
+                    { value: 'd', text: "El aluminio en papel de aluminio." }
                 ]
             },
             {
-                question: "¿Qué es un alcano?",
-                answers: [
-                    { text: "Un hidrocarburo con enlaces simples entre carbonos.", correct: true },
-                    { text: "Un hidrocarburo con enlaces dobles entre carbonos.", correct: false },
-                    { text: "Un hidrocarburo con enlaces triples entre carbonos.", correct: false },
-                    { text: "Un hidrocarburo aromático.", correct: false }
+                id: 'q4',
+                indicator: 'Indicador 7.1: Describe y representa las características del átomo de carbono y sus aplicaciones en la vida cotidiana.',
+                question: "¿Qué propiedad del carbono le permite formar estructuras en forma de cadena?",
+                options: [
+                    { value: 'a', text: "Catenación." },
+                    { value: 'b', text: "Ionización." },
+                    { value: 'c', text: "Solubilidad." },
+                    { value: 'd', text: "Electronegatividad." }
                 ]
             },
             {
-                question: "¿Qué es un alqueno?",
-                answers: [
-                    { text: "Un hidrocarburo con enlaces dobles entre carbonos.", correct: true },
-                    { text: "Un hidrocarburo con enlaces simples entre carbonos.", correct: false },
-                    { text: "Un hidrocarburo con enlaces triples entre carbonos.", correct: false },
-                    { text: "Un hidrocarburo aromático.", correct: false }
+                id: 'q5',
+                indicator: 'Indicador 7.1: Describe y representa las características del átomo de carbono y sus aplicaciones en la vida cotidiana.',
+                question: "¿Cómo se denomina a los compuestos que contienen solo átomos de carbono e hidrógeno?",
+                options: [
+                    { value: 'a', text: "Hidrocarburos." },
+                    { value: 'b', text: "Alcoholes." },
+                    { value: 'c', text: "Ésteres." },
+                    { value: 'd', text: "Amidas." }
                 ]
             },
             {
-                question: "¿Qué es un alquino?",
-                answers: [
-                    { text: "Un hidrocarburo con enlaces triples entre carbonos.", correct: true },
-                    { text: "Un hidrocarburo con enlaces dobles entre carbonos.", correct: false },
-                    { text: "Un hidrocarburo con enlaces simples entre carbonos.", correct: false },
-                    { text: "Un hidrocarburo aromático.", correct: false }
+                id: 'q6',
+                indicator: 'Indicador 7.1: Describe y representa las características del átomo de carbono y sus aplicaciones en la vida cotidiana.',
+                question: "¿Cuál de las siguientes formas del carbono se utiliza en joyería?",
+                options: [
+                    { value: 'a', text: "Diamante." },
+                    { value: 'b', text: "Grafito." },
+                    { value: 'c', text: "Fullereno." },
+                    { value: 'd', text: "Carbón activado." }
                 ]
             },
             {
-                question: "¿Qué es un hidrocarburo aromático?",
-                answers: [
-                    { text: "Un hidrocarburo con uno o más anillos bencénicos.", correct: true },
-                    { text: "Un hidrocarburo con enlaces simples entre carbonos.", correct: false },
-                    { text: "Un hidrocarburo con enlaces dobles entre carbonos.", correct: false },
-                    { text: "Un hidrocarburo con enlaces triples entre carbonos.", correct: false }
+                id: 'q7',
+                indicator: 'Indicador 7.1: Describe y representa las características del átomo de carbono y sus aplicaciones en la vida cotidiana.',
+                question: "¿Qué tipo de isomería se encuentra comúnmente en los compuestos orgánicos?",
+                options: [
+                    { value: 'a', text: "Isomería estructural." },
+                    { value: 'b', text: "Isomería geométrica." },
+                    { value: 'c', text: "Isomería óptica." },
+                    { value: 'd', text: "Isomería conformacional." }
                 ]
             },
             {
-                question: "¿Qué es un grupo funcional?",
-                answers: [
-                    { text: "Un grupo de átomos que confiere propiedades químicas específicas a una molécula orgánica.", correct: true },
-                    { text: "Un grupo de átomos que no tiene ningún efecto sobre las propiedades químicas de una molécula orgánica.", correct: false },
-                    { text: "Un grupo de átomos que cambia la masa molar de una molécula orgánica.", correct: false },
-                    { text: "Un grupo de átomos que no está presente en los compuestos orgánicos.", correct: false }
+                id: 'q8',
+                indicator: 'Indicador 7.1: Describe y representa las características del átomo de carbono y sus aplicaciones en la vida cotidiana.',
+                question: "¿Qué aplicación importante tiene el carbono en la medicina?",
+                options: [
+                    { value: 'a', text: "Carbón activado para el tratamiento de intoxicaciones." },
+                    { value: 'b', text: "Diamante para la fabricación de lentes de contacto." },
+                    { value: 'c', text: "Grafito para prótesis." },
+                    { value: 'd', text: "Fullereno como antioxidante." }
+                ]
+            },
+            // Indicador 7.2
+            {
+                id: 'q9',
+                indicator: 'Indicador 7.2: Indaga y explica la importancia e implicaciones de los hidrocarburos en la vida de las personas y el medio ambiente.',
+                question: "¿Cuál es el impacto ambiental más significativo de los hidrocarburos?",
+                options: [
+                    { value: 'a', text: "Contribuyen al calentamiento global debido a la emisión de CO2 al quemarse." },
+                    { value: 'b', text: "Son completamente inofensivos para el medio ambiente." },
+                    { value: 'c', text: "No tienen impacto ambiental significativo." },
+                    { value: 'd', text: "Solo afectan la capa de ozono." }
                 ]
             },
             {
-                question: "¿Qué es un alcohol?",
-                answers: [
-                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: true },
-                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a un átomo de carbono.", correct: false }
+                id: 'q10',
+                indicator: 'Indicador 7.2: Indaga y explica la importancia e implicaciones de los hidrocarburos en la vida de las personas y el medio ambiente.',
+                question: "¿Qué tipo de hidrocarburo se utiliza comúnmente como combustible en automóviles?",
+                options: [
+                    { value: 'a', text: "Alcanos." },
+                    { value: 'b', text: "Alquenos." },
+                    { value: 'c', text: "Alquinos." },
+                    { value: 'd', text: "Aromáticos." }
                 ]
             },
             {
-                question: "¿Qué es un aldehído?",
-                answers: [
-                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a un átomo de carbono y un átomo de hidrógeno.", correct: true },
-                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                id: 'q11',
+                indicator: 'Indicador 7.2: Indaga y explica la importancia e implicaciones de los hidrocarburos en la vida de las personas y el medio ambiente.',
+                question: "¿Qué hidrocarburo es un componente principal del gas natural?",
+                options: [
+                    { value: 'a', text: "Metano." },
+                    { value: 'b', text: "Butano." },
+                    { value: 'c', text: "Propano." },
+                    { value: 'd', text: "Etano." }
                 ]
             },
             {
-                question: "¿Qué es una cetona?",
-                answers: [
-                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a dos átomos de carbono.", correct: true },
-                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                id: 'q12',
+                indicator: 'Indicador 7.2: Indaga y explica la importancia e implicaciones de los hidrocarburos en la vida de las personas y el medio ambiente.',
+                question: "¿Cómo afecta la quema de hidrocarburos al ciclo del carbono en la naturaleza?",
+                options: [
+                    { value: 'a', text: "Libera dióxido de carbono, aumentando la cantidad de gases de efecto invernadero." },
+                    { value: 'b', text: "Reduce la cantidad de carbono en el ciclo, disminuyendo los gases de efecto invernadero." },
+                    { value: 'c', text: "No tiene ningún efecto en el ciclo del carbono." },
+                    { value: 'd', text: "Interrumpe el ciclo del carbono por completo." }
                 ]
             },
             {
-                question: "¿Qué es un ácido carboxílico?",
-                answers: [
-                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: true },
-                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a un átomo de carbono y un átomo de hidrógeno.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                id: 'q13',
+                indicator: 'Indicador 7.2: Indaga y explica la importancia e implicaciones de los hidrocarburos en la vida de las personas y el medio ambiente.',
+                question: "¿Cuál es una de las aplicaciones más importantes de los hidrocarburos en la industria?",
+                options: [
+                    { value: 'a', text: "Producción de plásticos." },
+                    { value: 'b', text: "Producción de fertilizantes." },
+                    { value: 'c', text: "Producción de textiles." },
+                    { value: 'd', text: "Producción de medicamentos." }
                 ]
             },
             {
-                question: "¿Qué es un éster?",
-                answers: [
-                    { text: "Un compuesto orgánico que se forma por la reacción de un ácido carboxílico y un alcohol.", correct: true },
-                    { text: "Un compuesto orgánico que se forma por la reacción de un aldehído y un alcohol.", correct: false },
-                    { text: "Un compuesto orgánico que se forma por la reacción de una cetona y un alcohol.", correct: false },
-                    { text: "Un compuesto orgánico que se forma por la reacción de un ácido carboxílico y una cetona.", correct: false }
+                id: 'q14',
+                indicator: 'Indicador 7.2: Indaga y explica la importancia e implicaciones de los hidrocarburos en la vida de las personas y el medio ambiente.',
+                question: "¿Qué tipo de hidrocarburos se utiliza principalmente en la producción de polímeros?",
+                options: [
+                    { value: 'a', text: "Alquenos." },
+                    { value: 'b', text: "Alcanos." },
+                    { value: 'c', text: "Alquinos." },
+                    { value: 'd', text: "Aromáticos." }
                 ]
             },
             {
-                question: "¿Qué es una amina?",
-                answers: [
-                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: true },
-                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo carbonilo (C=O) unido a un átomo de carbono y un átomo de hidrógeno.", correct: false }
+                id: 'q15',
+                indicator: 'Indicador 7.2: Indaga y explica la importancia e implicaciones de los hidrocarburos en la vida de las personas y el medio ambiente.',
+                question: "¿Qué hidrocarburo es conocido por ser un gas de efecto invernadero más potente que el dióxido de carbono?",
+                options: [
+                    { value: 'a', text: "Metano." },
+                    { value: 'b', text: "Etano." },
+                    { value: 'c', text: "Propano." },
+                    { value: 'd', text: "Butano." }
                 ]
             },
             {
-                question: "¿Qué es un nitrilo?",
-                answers: [
-                    { text: "Un compuesto orgánico que contiene un grupo ciano (-CN) unido a un átomo de carbono.", correct: true },
-                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                id: 'q16',
+                indicator: 'Indicador 7.2: Indaga y explica la importancia e implicaciones de los hidrocarburos en la vida de las personas y el medio ambiente.',
+                question: "¿Qué producto derivado de los hidrocarburos es esencial en la fabricación de neumáticos?",
+                options: [
+                    { value: 'a', text: "El caucho sintético." },
+                    { value: 'b', text: "El plástico." },
+                    { value: 'c', text: "El vidrio." },
+                    { value: 'd', text: "El acero." }
+                ]
+            },
+            // Indicador 7.3
+            {
+                id: 'q17',
+                indicator: 'Indicador 7.3: Experimenta, identifica y describe las propiedades físicas y químicas de los hidrocarburos.',
+                question: "¿Cuál de las siguientes es una propiedad física común de los alcanos?",
+                options: [
+                    { value: 'a', text: "Son insolubles en agua." },
+                    { value: 'b', text: "Son solubles en agua." },
+                    { value: 'c', text: "Tienen altos puntos de ebullición." },
+                    { value: 'd', text: "Son altamente reactivos." }
                 ]
             },
             {
-                question: "¿Qué es un éter?",
-                answers: [
-                    { text: "Un compuesto orgánico que contiene un átomo de oxígeno unido a dos átomos de carbono.", correct: true },
-                    { text: "Un compuesto orgánico que contiene un grupo hidroxilo (-OH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo carboxilo (-COOH) unido a un átomo de carbono.", correct: false },
-                    { text: "Un compuesto orgánico que contiene un grupo amino (-NH2) unido a un átomo de carbono.", correct: false }
+                id: 'q18',
+                indicator: 'Indicador 7.3: Experimenta, identifica y describe las propiedades físicas y químicas de los hidrocarburos.',
+                question: "¿Qué propiedad química es característica de los alquenos?",
+                options: [
+                    { value: 'a', text: "Reactividad en reacciones de adición." },
+                    { value: 'b', text: "Estabilidad química." },
+                    { value: 'c', text: "Insolubilidad en solventes no polares." },
+                    { value: 'd', text: "Bajo punto de fusión." }
                 ]
             },
             {
-                question: "¿Qué es una amida?",
-                answers: [
-                    { text: "Un compuesto orgánico que se forma por la reacción de un ácido carboxílico y una amina.", correct: true },
-                    { text: "Un compuesto orgánico que se forma por la reacción de un aldehído y una amina.", correct: false },
-                    { text: "Un compuesto orgánico que se forma por la reacción de una cetona y una amina.", correct: false },
-                    { text: "Un compuesto orgánico que se forma por la reacción de un ácido carboxílico y una cetona.", correct: false }
+                id: 'q19',
+                indicator: 'Indicador 7.3: Experimenta, identifica y describe las propiedades físicas y químicas de los hidrocarburos.',
+                question: "¿Cuál es una propiedad física distintiva de los alquinos?",
+                options: [
+                    { value: 'a', text: "Son menos densos que el agua." },
+                    { value: 'b', text: "Tienen altos puntos de ebullición." },
+                    { value: 'c', text: "Son más densos que el agua." },
+                    { value: 'd', text: "Son solubles en agua." }
                 ]
             },
             {
-                question: "¿Qué es la polimerización?",
-                answers: [
-                    { text: "Un proceso en el cual pequeñas moléculas (monómeros) se unen para formar grandes moléculas (polímeros).", correct: true },
-                    { text: "Un proceso en el cual grandes moléculas (polímeros) se descomponen en pequeñas moléculas (monómeros).", correct: false },
-                    { text: "Un proceso en el cual pequeñas moléculas (monómeros) se descomponen en grandes moléculas (polímeros).", correct: false },
-                    { text: "Un proceso en el cual grandes moléculas (polímeros) se unen para formar pequeñas moléculas (monómeros).", correct: false }
+                id: 'q20',
+                indicator: 'Indicador 7.3: Experimenta, identifica y describe las propiedades físicas y químicas de los hidrocarburos.',
+                question: "¿Qué propiedad química es común en los hidrocarburos aromáticos?",
+                options: [
+                    { value: 'a', text: "Estabilidad debido a la resonancia." },
+                    { value: 'b', text: "Alta reactividad en reacciones de adición." },
+                    { value: 'c', text: "Facilidad para formar sales." },
+                    { value: 'd', text: "Solubilidad en agua." }
                 ]
             },
             {
-                question: "¿Qué es un polímero?",
-                answers: [
-                    { text: "Una gran molécula formada por la unión repetida de monómeros.", correct: true },
-                    { text: "Una pequeña molécula formada por la unión repetida de polímeros.", correct: false },
-                    { text: "Una gran molécula formada por la descomposición repetida de monómeros.", correct: false },
-                    { text: "Una pequeña molécula formada por la descomposición repetida de polímeros.", correct: false }
+                id: 'q21',
+                indicator: 'Indicador 7.3: Experimenta, identifica y describe las propiedades físicas y químicas de los hidrocarburos.',
+                question: "¿Cómo se comportan los hidrocarburos en presencia de oxígeno?",
+                options: [
+                    { value: 'a', text: "Se oxidan, liberando dióxido de carbono y agua." },
+                    { value: 'b', text: "Se reducen, absorbiendo oxígeno." },
+                    { value: 'c', text: "No reaccionan con el oxígeno." },
+                    { value: 'd', text: "Forman óxidos metálicos." }
                 ]
             },
             {
-                question: "¿Qué es una reacción de adición?",
-                answers: [
-                    { text: "Una reacción en la cual dos o más moléculas se combinan para formar una sola molécula.", correct: true },
-                    { text: "Una reacción en la cual una molécula se descompone en dos o más moléculas más pequeñas.", correct: false },
-                    { text: "Una reacción en la cual una molécula se convierte en dos o más isómeros.", correct: false },
-                    { text: "Una reacción en la cual una molécula se oxida y otra se reduce.", correct: false }
+                id: 'q22',
+                indicator: 'Indicador 7.3: Experimenta, identifica y describe las propiedades físicas y químicas de los hidrocarburos.',
+                question: "¿Qué tipo de reacción es característica de los alquenos debido a la presencia de un doble enlace?",
+                options: [
+                    { value: 'a', text: "Reacción de adición." },
+                    { value: 'b', text: "Reacción de sustitución." },
+                    { value: 'c', text: "Reacción de eliminación." },
+                    { value: 'd', text: "Reacción de polimerización." }
                 ]
             },
             {
-                question: "¿Qué es una reacción de eliminación?",
-                answers: [
-                    { text: "Una reacción en la cual una molécula se descompone en dos o más moléculas más pequeñas.", correct: true },
-                    { text: "Una reacción en la cual dos o más moléculas se combinan para formar una sola molécula.", correct: false },
-                    { text: "Una reacción en la cual una molécula se convierte en dos o más isómeros.", correct: false },
-                    { text: "Una reacción en la cual una molécula se oxida y otra se reduce.", correct: false }
+                id: 'q23',
+                indicator: 'Indicador 7.3: Experimenta, identifica y describe las propiedades físicas y químicas de los hidrocarburos.',
+                question: "¿Cuál de las siguientes propiedades es común en todos los hidrocarburos?",
+                options: [
+                    { value: 'a', text: "Son compuestos no polares." },
+                    { value: 'b', text: "Son compuestos polares." },
+                    { value: 'c', text: "Son solubles en agua." },
+                    { value: 'd', text: "Forman enlaces iónicos." }
                 ]
             },
             {
-                question: "¿Qué es una reacción de sustitución?",
-                answers: [
-                    { text: "Una reacción en la cual un átomo o grupo de átomos en una molécula es reemplazado por otro átomo o grupo de átomos.", correct: true },
-                    { text: "Una reacción en la cual una molécula se descompone en dos o más moléculas más pequeñas.", correct: false },
-                    { text: "Una reacción en la cual dos o más moléculas se combinan para formar una sola molécula.", correct: false },
-                    { text: "Una reacción en la cual una molécula se convierte en dos o más isómeros.", correct: false }
+                id: 'q24',
+                indicator: 'Indicador 7.3: Experimenta, identifica y describe las propiedades físicas y químicas de los hidrocarburos.',
+                question: "¿Cuál es una característica distintiva de los hidrocarburos saturados?",
+                options: [
+                    { value: 'a', text: "Solo tienen enlaces simples entre átomos de carbono." },
+                    { value: 'b', text: "Tienen al menos un enlace doble o triple entre átomos de carbono." },
+                    { value: 'c', text: "Son altamente reactivos." },
+                    { value: 'd', text: "Son inestables." }
+                ]
+            },
+            // Indicador 7.4
+            {
+                id: 'q25',
+                indicator: 'Indicador 7.4: Representa y explica modelos moleculares de algunos compuestos orgánicos.',
+                question: "¿Cuál es la representación molecular más común de los hidrocarburos?",
+                options: [
+                    { value: 'a', text: "Estructura de esqueleto." },
+                    { value: 'b', text: "Estructura de puntos de Lewis." },
+                    { value: 'c', text: "Estructura de Fischer." },
+                    { value: 'd', text: "Estructura de Newman." }
                 ]
             },
             {
-                question: "¿Qué es una reacción de condensación?",
-                answers: [
-                    { text: "Una reacción en la cual dos moléculas se combinan para formar una sola molécula con la eliminación de una pequeña molécula, como agua.", correct: true },
-                    { text: "Una reacción en la cual una molécula se descompone en dos o más moléculas más pequeñas.", correct: false },
-                    { text: "Una reacción en la cual dos o más moléculas se combinan para formar una sola molécula sin la eliminación de una pequeña molécula.", correct: false },
-                    { text: "Una reacción en la cual una molécula se convierte en dos o más isómeros.", correct: false }
+                id: 'q26',
+                indicator: 'Indicador 7.4: Representa y explica modelos moleculares de algunos compuestos orgánicos.',
+                question: "¿Qué tipo de modelo molecular muestra la disposición tridimensional de los átomos en una molécula?",
+                options: [
+                    { value: 'a', text: "Modelo de bolas y varillas." },
+                    { value: 'b', text: "Modelo de esqueleto." },
+                    { value: 'c', text: "Estructura de Fischer." },
+                    { value: 'd', text: "Estructura de Lewis." }
                 ]
             },
             {
-                question: "¿Qué es una reacción de oxidación?",
-                answers: [
-                    { text: "Una reacción en la cual una sustancia pierde electrones.", correct: true },
-                    { text: "Una reacción en la cual una sustancia gana electrones.", correct: false },
-                    { text: "Una reacción en la cual una sustancia gana protones.", correct: false },
-                    { text: "Una reacción en la cual una sustancia pierde protones.", correct: false }
+                id: 'q27',
+                indicator: 'Indicador 7.4: Representa y explica modelos moleculares de algunos compuestos orgánicos.',
+                question: "¿Qué representa la fórmula molecular de un compuesto orgánico?",
+                options: [
+                    { value: 'a', text: "El número y tipo de átomos en la molécula." },
+                    { value: 'b', text: "La disposición tridimensional de los átomos." },
+                    { value: 'c', text: "La longitud de los enlaces." },
+                    { value: 'd', text: "La reactividad química del compuesto." }
                 ]
             },
             {
-                question: "¿Qué es una reacción de reducción?",
-                answers: [
-                    { text: "Una reacción en la cual una sustancia gana electrones.", correct: true },
-                    { text: "Una reacción en la cual una sustancia pierde electrones.", correct: false },
-                    { text: "Una reacción en la cual una sustancia gana protones.", correct: false },
-                    { text: "Una reacción en la cual una sustancia pierde protones.", correct: false }
+                id: 'q28',
+                indicator: 'Indicador 7.4: Representa y explica modelos moleculares de algunos compuestos orgánicos.',
+                question: "¿Qué información proporciona la estructura de Lewis de un compuesto?",
+                options: [
+                    { value: 'a', text: "Los pares de electrones compartidos y no compartidos." },
+                    { value: 'b', text: "La forma geométrica de la molécula." },
+                    { value: 'c', text: "La reactividad química de la molécula." },
+                    { value: 'd', text: "La longitud y energía de los enlaces." }
+                ]
+            },
+            {
+                id: 'q29',
+                indicator: 'Indicador 7.4: Representa y explica modelos moleculares de algunos compuestos orgánicos.',
+                question: "¿Qué modelo molecular es útil para visualizar la rotación alrededor de enlaces simples?",
+                options: [
+                    { value: 'a', text: "Modelo de Newman." },
+                    { value: 'b', text: "Modelo de esqueleto." },
+                    { value: 'c', text: "Estructura de Lewis." },
+                    { value: 'd', text: "Estructura de Fischer." }
+                ]
+            },
+            {
+                id: 'q30',
+                indicator: 'Indicador 7.4: Representa y explica modelos moleculares de algunos compuestos orgánicos.',
+                question: "¿Qué representa la estructura de esqueleto en un compuesto orgánico?",
+                options: [
+                    { value: 'a', text: "Las conexiones entre átomos de carbono, sin mostrar los átomos de hidrógeno." },
+                    { value: 'b', text: "La disposición tridimensional completa de la molécula." },
+                    { value: 'c', text: "La estructura completa con todos los átomos y enlaces." },
+                    { value: 'd', text: "La orientación espacial de los grupos funcionales." }
+                ]
+            },
+            {
+                id: 'q31',
+                indicator: 'Indicador 7.4: Representa y explica modelos moleculares de algunos compuestos orgánicos.',
+                question: "¿Cuál es la importancia de representar modelos moleculares en la química orgánica?",
+                options: [
+                    { value: 'a', text: "Ayuda a entender la estructura, propiedades y reactividad de los compuestos." },
+                    { value: 'b', text: "Solo es útil para ilustrar compuestos inorgánicos." },
+                    { value: 'c', text: "Es irrelevante para la comprensión de la química orgánica." },
+                    { value: 'd', text: "Se utiliza únicamente en la industria farmacéutica." }
+                ]
+            },
+            {
+                id: 'q32',
+                indicator: 'Indicador 7.4: Representa y explica modelos moleculares de algunos compuestos orgánicos.',
+                question: "¿Qué tipo de información no se puede obtener de un modelo de esqueleto?",
+                options: [
+                    { value: 'a', text: "El número exacto de átomos de hidrógeno." },
+                    { value: 'b', text: "La disposición de átomos de carbono." },
+                    { value: 'c', text: "La orientación de los enlaces." },
+                    { value: 'd', text: "La conectividad entre los átomos de carbono." }
+                ]
+            },
+            // Indicador 7.5
+            {
+                id: 'q33',
+                indicator: 'Indicador 7.5: Experimenta y describe la importancia e impacto de las biomoléculas en la producción de alimentos, jabones, medicinas y la agroindustria.',
+                question: "¿Qué biomolécula es fundamental en la producción de energía en los organismos vivos?",
+                options: [
+                    { value: 'a', text: "Carbohidratos." },
+                    { value: 'b', text: "Proteínas." },
+                    { value: 'c', text: "Ácidos nucleicos." },
+                    { value: 'd', text: "Lípidos." }
+                ]
+            },
+            {
+                id: 'q34',
+                indicator: 'Indicador 7.5: Experimenta y describe la importancia e impacto de las biomoléculas en la producción de alimentos, jabones, medicinas y la agroindustria.',
+                question: "¿Qué biomolécula es esencial en la producción de jabones y detergentes?",
+                options: [
+                    { value: 'a', text: "Lípidos." },
+                    { value: 'b', text: "Carbohidratos." },
+                    { value: 'c', text: "Proteínas." },
+                    { value: 'd', text: "Ácidos nucleicos." }
+                ]
+            },
+            {
+                id: 'q35',
+                indicator: 'Indicador 7.5: Experimenta y describe la importancia e impacto de las biomoléculas en la producción de alimentos, jabones, medicinas y la agroindustria.',
+                question: "¿Qué tipo de biomolécula se utiliza en la industria farmacéutica para la síntesis de medicamentos?",
+                options: [
+                    { value: 'a', text: "Proteínas." },
+                    { value: 'b', text: "Carbohidratos." },
+                    { value: 'c', text: "Ácidos nucleicos." },
+                    { value: 'd', text: "Lípidos." }
+                ]
+            },
+            {
+                id: 'q36',
+                indicator: 'Indicador 7.5: Experimenta y describe la importancia e impacto de las biomoléculas en la producción de alimentos, jabones, medicinas y la agroindustria.',
+                question: "¿Qué biomolécula es crucial para la formación de estructuras celulares en los organismos?",
+                options: [
+                    { value: 'a', text: "Proteínas." },
+                    { value: 'b', text: "Carbohidratos." },
+                    { value: 'c', text: "Ácidos nucleicos." },
+                    { value: 'd', text: "Lípidos." }
+                ]
+            },
+            {
+                id: 'q37',
+                indicator: 'Indicador 7.5: Experimenta y describe la importancia e impacto de las biomoléculas en la producción de alimentos, jabones, medicinas y la agroindustria.',
+                question: "¿Qué biomolécula es más importante en la producción de biocombustibles?",
+                options: [
+                    { value: 'a', text: "Lípidos." },
+                    { value: 'b', text: "Proteínas." },
+                    { value: 'c', text: "Carbohidratos." },
+                    { value: 'd', text: "Ácidos nucleicos." }
+                ]
+            },
+            {
+                id: 'q38',
+                indicator: 'Indicador 7.5: Experimenta y describe la importancia e impacto de las biomoléculas en la producción de alimentos, jabones, medicinas y la agroindustria.',
+                question: "¿Qué tipo de biomolécula actúa como catalizador en las reacciones biológicas?",
+                options: [
+                    { value: 'a', text: "Proteínas (enzimas)." },
+                    { value: 'b', text: "Carbohidratos." },
+                    { value: 'c', text: "Lípidos." },
+                    { value: 'd', text: "Ácidos nucleicos." }
+                ]
+            },
+            {
+                id: 'q39',
+                indicator: 'Indicador 7.5: Experimenta y describe la importancia e impacto de las biomoléculas en la producción de alimentos, jabones, medicinas y la agroindustria.',
+                question: "¿Qué biomolécula es clave en la transmisión de información genética?",
+                options: [
+                    { value: 'a', text: "Ácidos nucleicos." },
+                    { value: 'b', text: "Proteínas." },
+                    { value: 'c', text: "Carbohidratos." },
+                    { value: 'd', text: "Lípidos." }
+                ]
+            },
+            {
+                id: 'q40',
+                indicator: 'Indicador 7.5: Experimenta y describe la importancia e impacto de las biomoléculas en la producción de alimentos, jabones, medicinas y la agroindustria.',
+                question: "¿Qué biomolécula es esencial en la producción de alimentos y nutrición?",
+                options: [
+                    { value: 'a', text: "Carbohidratos." },
+                    { value: 'b', text: "Proteínas." },
+                    { value: 'c', text: "Lípidos." },
+                    { value: 'd', text: "Ácidos nucleicos." }
                 ]
             }
         ];
 
-        let attempt = 0;
-        const maxAttempts = 3;
+        const correctAnswerKeys = { 
+            q1: 'a', q2: 'a', q3: 'a', q4: 'a', q5: 'a', q6: 'a', q7: 'a', q8: 'a', 
+            q9: 'a', q10: 'a', q11: 'a', q12: 'a', q13: 'a', q14: 'a', q15: 'a', q16: 'a',
+            q17: 'a', q18: 'a', q19: 'a', q20: 'a', q21: 'a', q22: 'a', q23: 'a', q24: 'a',
+            q25: 'a', q26: 'a', q27: 'a', q28: 'a', q29: 'a', q30: 'a', q31: 'a', q32: 'a',
+            q33: 'a', q34: 'a', q35: 'a', q36: 'a', q37: 'a', q38: 'a', q39: 'a', q40: 'a'
+        };
 
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -313,80 +566,99 @@
             return array;
         }
 
-        function loadQuiz() {
-            const quizContainer = document.getElementById('quiz');
-            quizContainer.innerHTML = '';
-            quizData.forEach((data, index) => {
-                const questionContainer = document.createElement('div');
-                questionContainer.className = 'question';
+        function displayQuestions() {
+            const container = document.getElementById('questions-container');
+            const shuffledQuestions = shuffle([...questions]);
 
-                const questionTitle = document.createElement('h3');
-                questionTitle.innerText = `${index + 1}. ${data.question}`;
-                questionContainer.appendChild(questionTitle);
-
-                const optionsList = document.createElement('ul');
-                optionsList.className = 'options';
-
-                shuffle(data.answers).forEach(answer => {
-                    const option = document.createElement('li');
-                    const optionLabel = document.createElement('label');
-                    const optionInput = document.createElement('input');
-                    optionInput.type = 'radio';
-                    optionInput.name = `question${index}`;
-                    optionInput.value = answer.correct;
-                    optionLabel.appendChild(optionInput);
-                    optionLabel.appendChild(document.createTextNode(answer.text));
-                    option.appendChild(optionLabel);
-                    optionsList.appendChild(option);
-                });
-
-                questionContainer.appendChild(optionsList);
-                quizContainer.appendChild(questionContainer);
+            shuffledQuestions.forEach((q, index) => {
+                const questionElement = document.createElement('div');
+                questionElement.classList.add('question');
+                questionElement.innerHTML = `
+                    <h3>${q.indicator}</h3>
+                    <p>${index + 1}. ${q.question}</p>
+                    ${q.options.map(option => `
+                        <input type="radio" name="${q.id}" value="${option.value}" required> ${option.value}) ${option.text}<br>
+                    `).join('')}
+                `;
+                container.appendChild(questionElement);
             });
         }
 
-        function submitQuiz() {
-            if (attempt >= maxAttempts) {
-                alert('Has alcanzado el número máximo de intentos.');
+        function startTimer() {
+            document.getElementById('timer').classList.remove('hidden');
+            startTime = new Date();
+            const timerInterval = setInterval(() => {
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                if (timeRemaining === 0) {
+                    clearInterval(timerInterval);
+                    showResults("Tiempo agotado. No se pudo completar la evaluación.", []);
+                }
+                timeRemaining--;
+            }, 1000);
+        }
+
+        document.getElementById('infoForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const nie = document.getElementById('nie').value;
+
+            if (!nieList.includes(nie)) {
+                alert("NIE no autorizado.");
                 return;
             }
 
-            const resultsContainer = document.getElementById('results');
-            const answers = document.querySelectorAll('input[type="radio"]:checked');
-            let score = 0;
+            document.getElementById('studentInfoForm').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+            displayQuestions();
+            startTimer();
+        });
 
-            quizData.forEach((data, index) => {
-                const selected = answers[index] ? answers[index].value === 'true' : null;
-                if (selected === true) {
-                    score += 0.4; // Each correct answer is worth 0.4 points
+        document.getElementById('submitQuiz').addEventListener('click', function () {
+            let correctAnswers = 0;
+            let incorrectAnswers = [];
+
+            questions.forEach(q => {
+                const selectedAnswer = document.querySelector(`input[name="${q.id}"]:checked`);
+                if (selectedAnswer) {
+                    if (selectedAnswer.value === correctAnswerKeys[q.id]) {
+                        correctAnswers++;
+                    } else {
+                        incorrectAnswers.push(`Pregunta ${q.id.substring(1)} incorrecta.`);
+                    }
                 }
             });
 
-            score = Math.round(score * 10) / 10; // Round to one decimal place
-            let feedback = quizData.map((data, index) => {
-                const selected = answers[index] ? answers[index].value === 'true' : null;
-                let result;
-                if (selected === null) {
-                    result = "No contestada";
-                } else if (selected === true) {
-                    result = "Correcta";
-                } else {
-                    result = "Incorrecta";
-                }
-                return `<p>${index + 1}. ${result}</p>`;
-            }).join("");
+            const score = (correctAnswers / questions.length) * 10;
+            const endTime = new Date();
+            const timeTaken = Math.floor((endTime - startTime) / 1000); // Tiempo en segundos
 
-            resultsContainer.innerHTML = `<h3>Resultados:</h3><p>Puntaje: ${score} / 10</p>${feedback}`;
+            showResults(`Calificación: ${score.toFixed(2)} / 10`, incorrectAnswers, timeTaken);
+        });
 
-            attempt++;
-            if (attempt >= maxAttempts) {
-                alert('Has alcanzado el número máximo de intentos.');
-            }
+        function showResults(scoreText, incorrectAnswers, timeTaken) {
+            const date = new Date();
+            const minutesTaken = Math.floor(timeTaken / 60);
+            const secondsTaken = timeTaken % 60;
+
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('resultsModal').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+
+            document.getElementById('date').textContent = `Fecha: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+            document.getElementById('timeTaken').textContent = `Tiempo tomado: ${minutesTaken} minutos y ${secondsTaken} segundos`;
+            document.getElementById('unitEvaluated').textContent = `Unidad Evaluada: Unidad 7: Química Orgánica`;
+            document.getElementById('studentName').textContent = `Nombre del Estudiante: ${document.getElementById('name').value}`;
+            document.getElementById('studentNIE').textContent = `NIE: ${document.getElementById('nie').value}`;
+            document.getElementById('score').textContent = scoreText;
+            document.getElementById('incorrectAnswers').textContent = incorrectAnswers.join(', ');
         }
 
-        document.getElementById('submit').addEventListener('click', submitQuiz);
-
-        loadQuiz();
+        document.getElementById('closeModal').addEventListener('click', function () {
+            document.getElementById('resultsModal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        });
     </script>
 </body>
 </html>
