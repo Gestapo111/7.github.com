@@ -440,52 +440,20 @@
             }
         ];
 
-        const quizContainer = document.getElementById('quiz');
-        const submitButton = document.getElementById('submit');
-        const resultModal = document.getElementById('resultModal');
-        const closeModalButton = document.querySelector('.close');
+const authorizedNIEs = [
+            "4267837", "3850952", "3851018", "5032035", "19806181", "6297536", "2608724",
+            "6262810", "4267838", "20162435", "3850923", "19806209", "4267828", "3850942"
+        ];
 
-        let currentQuiz = [];
-        let currentQuestionIndex = 0;
-        let score = 0;
+        let attempt = 0;
+        const maxAttempts = 2;
+        const evaluationName = "Evaluación Unidad 7: Química Orgánica";
         let timer;
-        let attempts = 0;
-        let manipulations = 0;
+        let timeLeft = 1800; // 30 minutos en segundos
+        let startTime;
+        let manipulationCount = 0;
 
-        function loadQuiz() {
-            currentQuiz = shuffleArray([...quizData]);
-            quizContainer.innerHTML = '';
-
-            currentQuiz.forEach((questionObj, index) => {
-                const questionElement = document.createElement('div');
-                questionElement.classList.add('question');
-                questionElement.innerHTML = `<strong>${index + 1}. ${questionObj.question}</strong>`;
-
-                const optionsElement = document.createElement('ul');
-                optionsElement.classList.add('options');
-
-                questionObj.answers = shuffleArray(questionObj.answers);
-
-                questionObj.answers.forEach(answer => {
-                    const answerElement = document.createElement('li');
-                    answerElement.innerHTML = `
-                        <label>
-                            <input type="radio" name="question${index}" value="${answer.correct}">
-                            ${answer.text}
-                        </label>
-                    `;
-                    optionsElement.appendChild(answerElement);
-                });
-
-                questionElement.appendChild(optionsElement);
-                quizContainer.appendChild(questionElement);
-            });
-
-            submitButton.disabled = false;
-            quizContainer.style.display = 'block';
-        }
-
-        function shuffleArray(array) {
+        function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [array[i], array[j]] = [array[j], array[i]];
@@ -493,85 +461,135 @@
             return array;
         }
 
+        function loadQuiz() {
+            const quizContainer = document.getElementById('quiz');
+            quizContainer.innerHTML = '';
+            
+            // Shuffle questions and answers
+            const shuffledQuizData = shuffle([...quizData]);
+            shuffledQuizData.forEach((quizItem, quizIndex) => {
+                const questionElement = document.createElement('div');
+                questionElement.className = 'question';
+                questionElement.innerHTML = `<strong>${quizIndex + 1}. ${quizItem.question}</strong>`;
+                
+                const optionsList = document.createElement('ul');
+                optionsList.className = 'options';
+
+                const shuffledAnswers = shuffle([...quizItem.answers]);
+                shuffledAnswers.forEach((answer, answerIndex) => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <label>
+                            <input type="radio" name="question${quizIndex}" value="${answer.correct}">
+                            ${answer.text}
+                        </label>`;
+                    optionsList.appendChild(listItem);
+                });
+
+                questionElement.appendChild(optionsList);
+                quizContainer.appendChild(questionElement);
+            });
+        }
+
+        document.getElementById('startQuiz').addEventListener('click', () => {
+            const fullname = document.getElementById('fullname').value.trim();
+            const nie = document.getElementById('nie').value.trim();
+
+            if (fullname && authorizedNIEs.includes(nie)) {
+                document.getElementById('quiz').style.display = 'block';
+                document.getElementById('startQuiz').style.display = 'none';
+
+                startTimer();
+                startTime = new Date();
+            } else {
+                alert('Por favor, ingresa un NIE válido o asegúrate de que tu nombre esté completo.');
+            }
+        });
+
+        document.getElementById('submit').addEventListener('click', () => {
+            const answerContainers = document.querySelectorAll('.quiz-container .question');
+            let score = 0;
+            let incorrectAnswers = [];
+
+            answerContainers.forEach((container, index) => {
+                const selectedOption = container.querySelector('input[type="radio"]:checked');
+                if (selectedOption) {
+                    const isCorrect = selectedOption.value === "true";
+                    if (isCorrect) {
+                        score++;
+                    } else {
+                        incorrectAnswers.push(index + 1);
+                    }
+                } else {
+                    incorrectAnswers.push(index + 1);
+                }
+            });
+
+            const endTime = new Date();
+            const timeTaken = Math.floor((endTime - startTime) / 1000);
+
+            const fullname = document.getElementById('fullname').value.trim();
+            const nie = document.getElementById('nie').value.trim();
+            const scorePercentage = (score / quizData.length) * 10;
+            const formattedTimeTaken = `${Math.floor(timeTaken / 60)} minutos y ${timeTaken % 60} segundos`;
+
+            // Show results in the modal
+            document.getElementById('modalName').innerText = `Nombre: ${fullname}`;
+            document.getElementById('modalNIE').innerText = `NIE: ${nie}`;
+            document.getElementById('modalDetails').innerText = `Calificación obtenida: ${scorePercentage.toFixed(2)} / 10\nTiempo: ${formattedTimeTaken}\nUnidad: ${evaluationName}\nFecha: ${new Date().toLocaleString()}`;
+            document.getElementById('modalIncorrectAnswers').innerHTML = incorrectAnswers.map(num => `<div>Pregunta ${num}</div>`).join('');
+            document.getElementById('attemptCount').innerText = `Intento ${attempt + 1} de ${maxAttempts}`;
+            document.getElementById('manipulationCount').innerText = `Intentos de manipulación detectados: ${manipulationCount}`;
+            document.getElementById('resultModal').style.display = 'block';
+
+            attempt++;
+            if (attempt >= maxAttempts) {
+                document.getElementById('submit').disabled = true;
+            }
+        });
+
+        document.querySelector('.close').addEventListener('click', () => {
+            document.getElementById('resultModal').style.display = 'none';
+        });
+
         function startTimer() {
-            let timeLeft = 1800;
             timer = setInterval(() => {
                 timeLeft--;
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                const formattedTime = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                const timerElement = document.getElementById('timer');
-                timerElement.textContent = formattedTime;
-
-                if (timeLeft <= 600 && timeLeft > 300) {
-                    timerElement.style.color = 'orange';
-                } else if (timeLeft <= 300) {
-                    timerElement.style.color = 'red';
-                }
-
-                if (timeLeft === 0) {
+                if (timeLeft <= 0) {
                     clearInterval(timer);
-                    submitQuiz();
+                    document.getElementById('submit').click();
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    document.getElementById('timer').innerText = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+                    if (timeLeft <= 600 && timeLeft > 300) {
+                        document.getElementById('timer').style.backgroundColor = 'orange';
+                    } else if (timeLeft <= 300) {
+                        document.getElementById('timer').style.backgroundColor = 'red';
+                    }
                 }
             }, 1000);
         }
 
-        function submitQuiz() {
-            clearInterval(timer);
-            let incorrectAnswers = 0;
-            let totalQuestions = currentQuiz.length;
+        // Deshabilitar clic derecho
+        document.addEventListener('contextmenu', (event) => event.preventDefault());
 
-            currentQuiz.forEach((questionObj, index) => {
-                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
-                if (selectedOption) {
-                    if (selectedOption.value === "true") {
-                        score++;
-                    } else {
-                        incorrectAnswers++;
-                    }
-                } else {
-                    incorrectAnswers++;
-                }
-            });
+        // Deshabilitar copiar y pegar
+        document.addEventListener('copy', (event) => event.preventDefault());
+        document.addEventListener('paste', (event) => event.preventDefault());
 
-            const modalName = document.getElementById('modalName');
-            const modalNIE = document.getElementById('modalNIE');
-            const modalDetails = document.getElementById('modalDetails');
-            const modalIncorrectAnswers = document.getElementById('modalIncorrectAnswers');
-            const attemptCount = document.getElementById('attemptCount');
-            const manipulationCount = document.getElementById('manipulationCount');
+        // Monitor de cambios sospechosos
+        let originalQuizState = JSON.stringify([...document.querySelectorAll('input[type="radio"]')].map(input => input.checked));
+        setInterval(() => {
+            const currentQuizState = JSON.stringify([...document.querySelectorAll('input[type="radio"]')].map(input => input.checked));
+            if (originalQuizState !== currentQuizState) {
+                manipulationCount++;
+                originalQuizState = currentQuizState;
+            }
+        }, 1000);
 
-            modalName.textContent = `Nombre: ${document.getElementById('fullname').value}`;
-            modalNIE.textContent = `NIE: ${document.getElementById('nie').value}`;
-            modalDetails.textContent = `Calificación: ${score} / ${totalQuestions}`;
-            modalIncorrectAnswers.textContent = `Respuestas incorrectas: ${incorrectAnswers}`;
-            attemptCount.textContent = `Intentos realizados: ${attempts}`;
-            manipulationCount.textContent = `Manipulaciones realizadas: ${manipulations}`;
-
-            resultModal.style.display = 'block';
-        }
-
-        closeModalButton.addEventListener('click', () => {
-            resultModal.style.display = 'none';
-        });
-
-        submitButton.addEventListener('click', submitQuiz);
-
-        document.getElementById('startQuiz').addEventListener('click', () => {
-            attempts++;
-            loadQuiz();
-            startTimer();
-        });
-
-        document.getElementById('fullname').addEventListener('input', checkInputs);
-        document.getElementById('nie').addEventListener('input', checkInputs);
-
-        function checkInputs() {
-            const nameInput = document.getElementById('fullname').value.trim();
-            const nieInput = document.getElementById('nie').value.trim();
-
-            document.getElementById('startQuiz').disabled = !nameInput || !nieInput;
-        }
+        // Cargar el cuestionario
+        loadQuiz();
     </script>
 </body>
 </html>
