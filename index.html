@@ -7,70 +7,181 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+        h1 {
+            color: #333;
         }
         .quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
             max-width: 800px;
-            margin: auto;
+            display: none;
         }
-        .question {
-            margin-bottom: 20px;
-        }
-        .question strong {
-            display: block;
+        .indicator {
+            font-weight: bold;
             margin-bottom: 10px;
         }
+        .question {
+            margin-bottom: 15px;
+        }
         .options {
-            list-style: none;
+            list-style-type: none;
             padding: 0;
         }
         .options li {
             margin-bottom: 10px;
         }
-        #submit {
-            margin-top: 20px;
+        button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
         }
-        #resultModal {
+        button:hover {
+            background-color: #218838;
+        }
+        #results {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            width: 100%;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+        }
+        .input-field {
+            margin-bottom: 10px;
+        }
+        .input-field label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-field input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        /* Modal Styles */
+        .modal {
             display: none;
             position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
         }
-        #resultModal .close {
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .close {
+            color: #aaa;
             float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
             cursor: pointer;
         }
+        /* Cronómetro flotante */
         #timer {
-            font-size: 20px;
-            font-weight: bold;
-            color: green;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background-color: green;
+            color: white;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+        /* Estilo para los números de preguntas incorrectas */
+        .incorrect-answers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .incorrect-answers div {
+            width: 18%;
+            text-align: center;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 5px;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
+    <h1>Evaluación Unidad 7: Química Orgánica</h1>
     <div class="quiz-container">
-        <h2>Evaluación Unidad 7: Química Orgánica</h2>
-        <p>Nombre: <input type="text" id="fullname" required></p>
-        <p>NIE: <input type="text" id="nie" required></p>
-        <button id="startQuiz">Comenzar Evaluación</button>
+        <div id="quiz"></div>
+        <button id="submit">Enviar respuestas</button>
+    </div>
+    <footer>
+        &copy; Derechos Reservados Prof. Alberto Sanchez
+    </footer>
 
-        <div id="quiz" style="display: none;">
-            <!-- Aquí se insertarán las preguntas -->
+    <!-- Modal para solicitar nombre y NIE -->
+    <div id="infoModal" class="modal">
+        <div class="modal-content">
+            <h2>Por favor, ingresa tus datos</h2>
+            <div class="input-field">
+                <label for="fullname">Nombre completo:</label>
+                <input type="text" id="fullname" required>
+            </div>
+            <div class="input-field">
+                <label for="nie">NIE:</label>
+                <input type="text" id="nie" required>
+            </div>
+            <button id="startQuiz">Comenzar Evaluación</button>
         </div>
+    </div>
 
-        <div id="resultModal">
-            <span class="close">X</span>
-            <h2>Resultados</h2>
+    <!-- Modal de resultados -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Resultados de la Evaluación</h2>
             <p id="modalName"></p>
             <p id="modalNIE"></p>
+            <h3>Preguntas incorrectas:</h3>
+            <div id="modalIncorrectAnswers" class="incorrect-answers"></div>
+            <h3>Detalles:</h3>
             <p id="modalDetails"></p>
-            <p id="modalIncorrectAnswers"></p>
-            <p id="attemptCount"></p>
+            <h3>Intentos de manipulación detectados:</h3>
             <p id="manipulationCount"></p>
-            <button id="submit" disabled>Obtener Calificación</button>
+            <h3>Reintentos:</h3>
+            <p id="attemptCount"></p>
         </div>
     </div>
 
@@ -79,370 +190,261 @@
     <script>
         const quizData = [
             {
-                question: "¿Cómo se denomina a los compuestos que contienen solo átomos de carbono e hidrógeno?",
-                answers: [
-                    { text: "Hidrocarburos.", correct: true },
-                    { text: "Alcoholes.", correct: false },
-                    { text: "Ésteres.", correct: false },
-                    { text: "Amidas.", correct: false }
+                indicator: "Indicador 1: Comprende la estructura y nomenclatura básica de los compuestos orgánicos.",
+                questions: [
+                    {
+                        question: "¿Cuál es la fórmula molecular del metano?",
+                        answers: [
+                            { text: "CH3", correct: false },
+                            { text: "C2H6", correct: false },
+                            { text: "CH4", correct: true },
+                            { text: "C3H8", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Qué tipo de enlace predomina en los compuestos orgánicos?",
+                        answers: [
+                            { text: "Iónico", correct: false },
+                            { text: "Covalente", correct: true },
+                            { text: "Metálico", correct: false },
+                            { text: "Puente de hidrógeno", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Cuál es la fórmula molecular del etano?",
+                        answers: [
+                            { text: "C2H4", correct: false },
+                            { text: "C2H6", correct: true },
+                            { text: "CH4", correct: false },
+                            { text: "C3H8", correct: false }
+                        ]
+                    },
+                    {
+                        question: "El benceno es un ejemplo de:",
+                        answers: [
+                            { text: "Hidrocarburo alifático", correct: false },
+                            { text: "Hidrocarburo aromático", correct: true },
+                            { text: "Alcohol", correct: false },
+                            { text: "Aldehído", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Cuál es la fórmula estructural del metanol?",
+                        answers: [
+                            { text: "CH3OH", correct: true },
+                            { text: "CH4O", correct: false },
+                            { text: "C2H5OH", correct: false },
+                            { text: "CH2O", correct: false }
+                        ]
+                    }
                 ]
             },
             {
-                question: "¿Qué biomolécula es crucial para la formación de estructuras celulares en los organismos?",
-                answers: [
-                    { text: "Proteínas.", correct: true },
-                    { text: "Carbohidratos.", correct: false },
-                    { text: "Ácidos nucleicos.", correct: false },
-                    { text: "Lípidos.", correct: false }
+                indicator: "Indicador 2: Diferencia las propiedades físicas y químicas de los compuestos orgánicos.",
+                questions: [
+                    {
+                        question: "¿Qué propiedad es común en la mayoría de los compuestos orgánicos?",
+                        answers: [
+                            { text: "Alto punto de fusión", correct: false },
+                            { text: "Alta solubilidad en agua", correct: false },
+                            { text: "Inflamabilidad", correct: true },
+                            { text: "Conducción eléctrica", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Qué tipo de reacción es común en los alcanos?",
+                        answers: [
+                            { text: "Adición", correct: false },
+                            { text: "Sustitución", correct: true },
+                            { text: "Eliminación", correct: false },
+                            { text: "Polimerización", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Qué reacción convierte un alcohol en un aldehído?",
+                        answers: [
+                            { text: "Oxidación", correct: true },
+                            { text: "Reducción", correct: false },
+                            { text: "Hidrólisis", correct: false },
+                            { text: "Sustitución", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Cuál es una característica de los alquenos?",
+                        answers: [
+                            { text: "Tienen un enlace simple entre carbonos", correct: false },
+                            { text: "Son saturados", correct: false },
+                            { text: "Tienen un enlace doble entre carbonos", correct: true },
+                            { text: "Tienen un anillo bencénico", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Cuál es una propiedad química de los alquinos?",
+                        answers: [
+                            { text: "Reaccionan fácilmente con ácidos", correct: false },
+                            { text: "Tienen enlaces triples carbono-carbono", correct: true },
+                            { text: "Son saturados", correct: false },
+                            { text: "Son solubles en agua", correct: false }
+                        ]
+                    }
                 ]
             },
             {
-                question: "¿Cómo se comportan los hidrocarburos en presencia de oxígeno?",
-                answers: [
-                    { text: "Se oxidan, liberando dióxido de carbono y agua.", correct: true },
-                    { text: "Se reducen, absorbiendo oxígeno.", correct: false },
-                    { text: "No reaccionan con el oxígeno.", correct: false },
-                    { text: "Forman óxidos metálicos.", correct: false }
+                indicator: "Indicador 3: Aplica las reglas de nomenclatura IUPAC para nombrar diferentes tipos de compuestos orgánicos.",
+                questions: [
+                    {
+                        question: "¿Cuál es el nombre IUPAC del compuesto CH3-CH2-CH3?",
+                        answers: [
+                            { text: "Propano", correct: true },
+                            { text: "Metano", correct: false },
+                            { text: "Butano", correct: false },
+                            { text: "Etano", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Qué nombre corresponde a la estructura CH2=CH2?",
+                        answers: [
+                            { text: "Etano", correct: false },
+                            { text: "Eteno", correct: true },
+                            { text: "Propano", correct: false },
+                            { text: "Butano", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Cuál es el nombre IUPAC de CH≡CH?",
+                        answers: [
+                            { text: "Etano", correct: false },
+                            { text: "Eteno", correct: false },
+                            { text: "Etino", correct: true },
+                            { text: "Propino", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Cómo se llama el compuesto CH3-CH2-OH?",
+                        answers: [
+                            { text: "Etanol", correct: true },
+                            { text: "Metanol", correct: false },
+                            { text: "Propano", correct: false },
+                            { text: "Butano", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Cuál es el nombre correcto del compuesto CH3COOH?",
+                        answers: [
+                            { text: "Ácido metanoico", correct: false },
+                            { text: "Ácido acético", correct: true },
+                            { text: "Ácido propanoico", correct: false },
+                            { text: "Ácido butanoico", correct: false }
+                        ]
+                    }
                 ]
             },
             {
-                question: "¿Cuál es el impacto ambiental más significativo de los hidrocarburos?",
-                answers: [
-                    { text: "Contribuyen al calentamiento global debido a la emisión de CO2 al quemarse.", correct: true },
-                    { text: "Son completamente inofensivos para el medio ambiente.", correct: false },
-                    { text: "No tienen impacto ambiental significativo.", correct: false },
-                    { text: "Solo afectan la capa de ozono.", correct: false }
+                indicator: "Indicador 4: Diferencia entre los distintos tipos de hidrocarburos: alcanos, alquenos, alquinos y compuestos aromáticos.",
+                questions: [
+                    {
+                        question: "¿Cuál de los siguientes es un hidrocarburo saturado?",
+                        answers: [
+                            { text: "Metano", correct: true },
+                            { text: "Eteno", correct: false },
+                            { text: "Acetileno", correct: false },
+                            { text: "Benceno", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Qué tipo de hidrocarburo es el benceno?",
+                        answers: [
+                            { text: "Alcano", correct: false },
+                            { text: "Alqueno", correct: false },
+                            { text: "Alquino", correct: false },
+                            { text: "Aromático", correct: true }
+                        ]
+                    },
+                    {
+                        question: "¿Qué característica define a los alquenos?",
+                        answers: [
+                            { text: "Enlace triple", correct: false },
+                            { text: "Enlace simple", correct: false },
+                            { text: "Enlace doble", correct: true },
+                            { text: "Anillo aromático", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Cuál de los siguientes es un hidrocarburo insaturado?",
+                        answers: [
+                            { text: "Propano", correct: false },
+                            { text: "Etano", correct: false },
+                            { text: "Buteno", correct: true },
+                            { text: "Metano", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Qué tipo de hidrocarburo contiene enlaces triples entre carbonos?",
+                        answers: [
+                            { text: "Alquinos", correct: true },
+                            { text: "Alcanos", correct: false },
+                            { text: "Alquenos", correct: false },
+                            { text: "Aromáticos", correct: false }
+                        ]
+                    }
                 ]
             },
             {
-                question: "¿Qué biomolécula es fundamental en la producción de energía en los organismos vivos?",
-                answers: [
-                    { text: "Carbohidratos.", correct: true },
-                    { text: "Proteínas.", correct: false },
-                    { text: "Ácidos nucleicos.", correct: false },
-                    { text: "Lípidos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál es la importancia de representar modelos moleculares en la química orgánica?",
-                answers: [
-                    { text: "Ayuda a entender la estructura, propiedades y reactividad de los compuestos.", correct: true },
-                    { text: "Solo es útil para ilustrar compuestos inorgánicos.", correct: false },
-                    { text: "Es irrelevante para la comprensión de la química orgánica.", correct: false },
-                    { text: "Se utiliza únicamente en la industria farmacéutica.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué aplicación importante tiene el carbono en la medicina?",
-                answers: [
-                    { text: "Carbón activado para el tratamiento de intoxicaciones.", correct: true },
-                    { text: "Diamante para la fabricación de lentes de contacto.", correct: false },
-                    { text: "Grafito para prótesis.", correct: false },
-                    { text: "Fullereno como antioxidante.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué tipo de isomería se encuentra comúnmente en los compuestos orgánicos?",
-                answers: [
-                    { text: "Isomería estructural.", correct: true },
-                    { text: "Isomería geométrica.", correct: false },
-                    { text: "Isomería óptica.", correct: false },
-                    { text: "Isomería conformacional.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué biomolécula es esencial en la producción de jabones y detergentes?",
-                answers: [
-                    { text: "Lípidos.", correct: true },
-                    { text: "Carbohidratos.", correct: false },
-                    { text: "Proteínas.", correct: false },
-                    { text: "Ácidos nucleicos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué hidrocarburo es un componente principal del gas natural?",
-                answers: [
-                    { text: "Metano.", correct: true },
-                    { text: "Butano.", correct: false },
-                    { text: "Propano.", correct: false },
-                    { text: "Etano.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué biomolécula es esencial en la producción de alimentos y nutrición?",
-                answers: [
-                    { text: "Carbohidratos.", correct: true },
-                    { text: "Proteínas.", correct: false },
-                    { text: "Lípidos.", correct: false },
-                    { text: "Ácidos nucleicos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué producto derivado de los hidrocarburos es esencial en la fabricación de neumáticos?",
-                answers: [
-                    { text: "El caucho sintético.", correct: true },
-                    { text: "El plástico.", correct: false },
-                    { text: "El vidrio.", correct: false },
-                    { text: "El acero.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué propiedad química es característica de los alquenos?",
-                answers: [
-                    { text: "Reactividad en reacciones de adición.", correct: true },
-                    { text: "Estabilidad química.", correct: false },
-                    { text: "Insolubilidad en solventes no polares.", correct: false },
-                    { text: "Bajo punto de fusión.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué tipo de enlaces predominan en los compuestos orgánicos?",
-                answers: [
-                    { text: "Enlaces covalentes.", correct: true },
-                    { text: "Enlaces iónicos.", correct: false },
-                    { text: "Enlaces metálicos.", correct: false },
-                    { text: "Enlaces de hidrógeno.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué tipo de modelo molecular muestra la disposición tridimensional de los átomos en una molécula?",
-                answers: [
-                    { text: "Modelo de bolas y varillas.", correct: true },
-                    { text: "Modelo de esqueleto.", correct: false },
-                    { text: "Estructura de Fischer.", correct: false },
-                    { text: "Estructura de Lewis.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué información proporciona la estructura de Lewis de un compuesto?",
-                answers: [
-                    { text: "Los pares de electrones compartidos y no compartidos.", correct: true },
-                    { text: "La forma geométrica de la molécula.", correct: false },
-                    { text: "La reactividad química de la molécula.", correct: false },
-                    { text: "La longitud y energía de los enlaces.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál es la representación molecular más común de los hidrocarburos?",
-                answers: [
-                    { text: "Estructura de esqueleto.", correct: true },
-                    { text: "Estructura de puntos de Lewis.", correct: false },
-                    { text: "Estructura de Fischer.", correct: false },
-                    { text: "Estructura de Newman.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué propiedad del carbono le permite formar estructuras en forma de cadena?",
-                answers: [
-                    { text: "Catenación.", correct: true },
-                    { text: "Ionización.", correct: false },
-                    { text: "Solubilidad.", correct: false },
-                    { text: "Electronegatividad.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál es una propiedad física distintiva de los alquinos?",
-                answers: [
-                    { text: "Son menos densos que el agua.", correct: true },
-                    { text: "Tienen altos puntos de ebullición.", correct: false },
-                    { text: "Son más densos que el agua.", correct: false },
-                    { text: "Son solubles en agua.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué tipo de hidrocarburos se utiliza principalmente en la producción de polímeros?",
-                answers: [
-                    { text: "Alquenos.", correct: true },
-                    { text: "Alcanos.", correct: false },
-                    { text: "Alquinos.", correct: false },
-                    { text: "Aromáticos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál es una de las aplicaciones más importantes de los hidrocarburos en la industria?",
-                answers: [
-                    { text: "Producción de plásticos.", correct: true },
-                    { text: "Producción de fertilizantes.", correct: false },
-                    { text: "Producción de textiles.", correct: false },
-                    { text: "Producción de medicamentos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué propiedad química es común en los hidrocarburos aromáticos?",
-                answers: [
-                    { text: "Estabilidad debido a la resonancia.", correct: true },
-                    { text: "Alta reactividad en reacciones de adición.", correct: false },
-                    { text: "Facilidad para formar sales.", correct: false },
-                    { text: "Solubilidad en agua.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué hidrocarburo es conocido por ser un gas de efecto invernadero más potente que el dióxido de carbono?",
-                answers: [
-                    { text: "Metano.", correct: true },
-                    { text: "Etano.", correct: false },
-                    { text: "Propano.", correct: false },
-                    { text: "Butano.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cómo afecta la quema de hidrocarburos al ciclo del carbono en la naturaleza?",
-                answers: [
-                    { text: "Libera dióxido de carbono, aumentando la cantidad de gases de efecto invernadero.", correct: true },
-                    { text: "Reduce la cantidad de carbono en el ciclo, disminuyendo los gases de efecto invernadero.", correct: false },
-                    { text: "No tiene ningún efecto en el ciclo del carbono.", correct: false },
-                    { text: "Interrumpe el ciclo del carbono por completo.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué representa la fórmula molecular de un compuesto orgánico?",
-                answers: [
-                    { text: "El número y tipo de átomos en la molécula.", correct: true },
-                    { text: "La disposición tridimensional de los átomos.", correct: false },
-                    { text: "La longitud de los enlaces.", correct: false },
-                    { text: "La reactividad química del compuesto.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué tipo de hidrocarburo se utiliza comúnmente como combustible en automóviles?",
-                answers: [
-                    { text: "Alcanos.", correct: true },
-                    { text: "Alquenos.", correct: false },
-                    { text: "Alquinos.", correct: false },
-                    { text: "Aromáticos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál de las siguientes propiedades es común en todos los hidrocarburos?",
-                answers: [
-                    { text: "Son compuestos no polares.", correct: true },
-                    { text: "Son compuestos polares.", correct: false },
-                    { text: "Son solubles en agua.", correct: false },
-                    { text: "Forman enlaces iónicos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué biomolécula es más importante en la producción de biocombustibles?",
-                answers: [
-                    { text: "Lípidos.", correct: true },
-                    { text: "Proteínas.", correct: false },
-                    { text: "Carbohidratos.", correct: false },
-                    { text: "Ácidos nucleicos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué tipo de biomolécula actúa como catalizador en las reacciones biológicas?",
-                answers: [
-                    { text: "Proteínas (enzimas).", correct: true },
-                    { text: "Carbohidratos.", correct: false },
-                    { text: "Lípidos.", correct: false },
-                    { text: "Ácidos nucleicos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál de las siguientes es una propiedad física común de los alcanos?",
-                answers: [
-                    { text: "Son insolubles en agua.", correct: true },
-                    { text: "Son solubles en agua.", correct: false },
-                    { text: "Tienen altos puntos de ebullición.", correct: false },
-                    { text: "Son altamente reactivos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué tipo de reacción es característica de los alquenos debido a la presencia de un doble enlace?",
-                answers: [
-                    { text: "Reacción de adición.", correct: true },
-                    { text: "Reacción de sustitución.", correct: false },
-                    { text: "Reacción de eliminación.", correct: false },
-                    { text: "Reacción de polimerización.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál de las siguientes es una aplicación cotidiana del carbono?",
-                answers: [
-                    { text: "El grafito en los lápices.", correct: true },
-                    { text: "La sal de mesa.", correct: false },
-                    { text: "El cloruro de sodio en detergentes.", correct: false },
-                    { text: "El aluminio en papel de aluminio.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál es la característica principal del átomo de carbono que le permite formar una gran variedad de compuestos?",
-                answers: [
-                    { text: "Su capacidad para formar cuatro enlaces covalentes.", correct: true },
-                    { text: "Su capacidad para formar enlaces iónicos.", correct: false },
-                    { text: "Su capacidad para formar enlaces metálicos.", correct: false },
-                    { text: "Su capacidad para formar compuestos inorgánicos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué biomolécula es clave en la transmisión de información genética?",
-                answers: [
-                    { text: "Ácidos nucleicos.", correct: true },
-                    { text: "Proteínas.", correct: false },
-                    { text: "Carbohidratos.", correct: false },
-                    { text: "Lípidos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué modelo molecular es útil para visualizar la rotación alrededor de enlaces simples?",
-                answers: [
-                    { text: "Modelo de Newman.", correct: true },
-                    { text: "Modelo de esqueleto.", correct: false },
-                    { text: "Estructura de Lewis.", correct: false },
-                    { text: "Estructura de Fischer.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué tipo de biomolécula se utiliza en la industria farmacéutica para la síntesis de medicamentos?",
-                answers: [
-                    { text: "Proteínas.", correct: true },
-                    { text: "Carbohidratos.", correct: false },
-                    { text: "Ácidos nucleicos.", correct: false },
-                    { text: "Lípidos.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué tipo de información no se puede obtener de un modelo de esqueleto?",
-                answers: [
-                    { text: "El número exacto de átomos de hidrógeno.", correct: true },
-                    { text: "La disposición de átomos de carbono.", correct: false },
-                    { text: "La orientación de los enlaces.", correct: false },
-                    { text: "La conectividad entre los átomos de carbono.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál es una característica distintiva de los hidrocarburos saturados?",
-                answers: [
-                    { text: "Solo tienen enlaces simples entre átomos de carbono.", correct: true },
-                    { text: "Tienen al menos un enlace doble o triple entre átomos de carbono.", correct: false },
-                    { text: "Son altamente reactivos.", correct: false },
-                    { text: "Son inestables.", correct: false }
-                ]
-            },
-            {
-                question: "¿Qué representa la estructura de esqueleto en un compuesto orgánico?",
-                answers: [
-                    { text: "Las conexiones entre átomos de carbono, sin mostrar los átomos de hidrógeno.", correct: true },
-                    { text: "La disposición tridimensional completa de la molécula.", correct: false },
-                    { text: "La estructura completa con todos los átomos y enlaces.", correct: false },
-                    { text: "La orientación espacial de los grupos funcionales.", correct: false }
-                ]
-            },
-            {
-                question: "¿Cuál de las siguientes formas del carbono se utiliza en joyería?",
-                answers: [
-                    { text: "Diamante.", correct: true },
-                    { text: "Grafito.", correct: false },
-                    { text: "Fullereno.", correct: false },
-                    { text: "Carbón activado.", correct: false }
+                indicator: "Indicador 5: Reconoce la importancia de los compuestos orgánicos en la vida diaria y en la industria.",
+                questions: [
+                    {
+                        question: "¿Cuál de los siguientes compuestos se utiliza comúnmente en la fabricación de plásticos?",
+                        answers: [
+                            { text: "Eteno", correct: true },
+                            { text: "Metano", correct: false },
+                            { text: "Benceno", correct: false },
+                            { text: "Butano", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Qué compuesto orgánico es fundamental en la síntesis de perfumes?",
+                        answers: [
+                            { text: "Alcoholes", correct: true },
+                            { text: "Alcanos", correct: false },
+                            { text: "Alquinos", correct: false },
+                            { text: "Alquenos", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Qué tipo de compuesto es común en los detergentes?",
+                        answers: [
+                            { text: "Sulfatos", correct: false },
+                            { text: "Ésteres", correct: true },
+                            { text: "Aminas", correct: false },
+                            { text: "Aldehídos", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Cuál es la importancia del etanol en la industria?",
+                        answers: [
+                            { text: "Es un buen disolvente y se utiliza en bebidas alcohólicas.", correct: true },
+                            { text: "Se utiliza como fertilizante.", correct: false },
+                            { text: "Es un componente principal en la gasolina.", correct: false },
+                            { text: "Se usa para fabricar plásticos.", correct: false }
+                        ]
+                    },
+                    {
+                        question: "¿Qué compuesto orgánico es clave en la síntesis de medicamentos?",
+                        answers: [
+                            { text: "Amidas", correct: true },
+                            { text: "Alcanos", correct: false },
+                            { text: "Aminas", correct: false },
+                            { text: "Alcoholes", correct: false }
+                        ]
+                    }
                 ]
             }
         ];
 
-const authorizedNIEs = [
-            "4267837", "3850952", "3851018", "5032035", "19806181", "6297536", "2608724",
-            "6262810", "4267838", "20162435", "3850923", "19806209", "4267828", "3850942"
+        const authorizedNIEs = [
+            "4267837", "3850952", "3851018", "5032035", "19806181", "6297536", 
+            "2608724", "6262810", "4267838", "20162435", "3850923", "19806209", 
+            "4267828", "3850942"
         ];
 
         let attempt = 0;
@@ -464,132 +466,196 @@ const authorizedNIEs = [
         function loadQuiz() {
             const quizContainer = document.getElementById('quiz');
             quizContainer.innerHTML = '';
-            
-            // Shuffle questions and answers
-            const shuffledQuizData = shuffle([...quizData]);
-            shuffledQuizData.forEach((quizItem, quizIndex) => {
-                const questionElement = document.createElement('div');
-                questionElement.className = 'question';
-                questionElement.innerHTML = `<strong>${quizIndex + 1}. ${quizItem.question}</strong>`;
-                
-                const optionsList = document.createElement('ul');
-                optionsList.className = 'options';
 
-                const shuffledAnswers = shuffle([...quizItem.answers]);
-                shuffledAnswers.forEach((answer, answerIndex) => {
-                    const listItem = document.createElement('li');
-                    listItem.innerHTML = `
-                        <label>
-                            <input type="radio" name="question${quizIndex}" value="${answer.correct}">
-                            ${answer.text}
-                        </label>`;
-                    optionsList.appendChild(listItem);
+            quizData.forEach(section => {
+                const indicatorTitle = document.createElement('div');
+                indicatorTitle.className = 'indicator';
+                indicatorTitle.innerText = section.indicator;
+                quizContainer.appendChild(indicatorTitle);
+
+                const shuffledQuestions = shuffle([...section.questions]);
+
+                shuffledQuestions.forEach((data, index) => {
+                    const questionContainer = document.createElement('div');
+                    questionContainer.className = 'question';
+
+                    const questionTitle = document.createElement('h3');
+                    questionTitle.innerText = `${index + 1}. ${data.question}`;
+                    questionContainer.appendChild(questionTitle);
+
+                    const optionsList = document.createElement('ul');
+                    optionsList.className = 'options';
+
+                    shuffle(data.answers).forEach(answer => {
+                        const option = document.createElement('li');
+                        const optionLabel = document.createElement('label');
+                        const optionInput = document.createElement('input');
+                        optionInput.type = 'radio';
+                        optionInput.name = `question${section.indicator}${index}`;
+                        optionInput.value = answer.correct;
+                        optionLabel.appendChild(optionInput);
+                        optionLabel.appendChild(document.createTextNode(answer.text));
+                        option.appendChild(optionLabel);
+                        optionsList.appendChild(option);
+                    });
+
+                    questionContainer.appendChild(optionsList);
+                    quizContainer.appendChild(questionContainer);
                 });
-
-                questionElement.appendChild(optionsList);
-                quizContainer.appendChild(questionElement);
             });
         }
 
-        document.getElementById('startQuiz').addEventListener('click', () => {
+        function submitQuiz() {
             const fullname = document.getElementById('fullname').value.trim();
             const nie = document.getElementById('nie').value.trim();
 
-            if (fullname && authorizedNIEs.includes(nie)) {
-                document.getElementById('quiz').style.display = 'block';
-                document.getElementById('startQuiz').style.display = 'none';
-
-                startTimer();
-                startTime = new Date();
-            } else {
-                alert('Por favor, ingresa un NIE válido o asegúrate de que tu nombre esté completo.');
+            if (!fullname || !nie) {
+                alert('Por favor, ingresa tu nombre completo y NIE.');
+                return;
             }
-        });
 
-        document.getElementById('submit').addEventListener('click', () => {
-            const answerContainers = document.querySelectorAll('.quiz-container .question');
-            let score = 0;
+            if (attempt >= maxAttempts) {
+                alert('Has alcanzado el número máximo de intentos.');
+                return;
+            }
+
+            const answers = document.querySelectorAll('input[type="radio"]:checked');
             let incorrectAnswers = [];
+            let questionCount = 0;
 
-            answerContainers.forEach((container, index) => {
-                const selectedOption = container.querySelector('input[type="radio"]:checked');
-                if (selectedOption) {
-                    const isCorrect = selectedOption.value === "true";
-                    if (isCorrect) {
-                        score++;
-                    } else {
-                        incorrectAnswers.push(index + 1);
+            quizData.forEach(section => {
+                section.questions.forEach((data, index) => {
+                    const selected = answers[questionCount] ? answers[questionCount].value === 'true' : null;
+                    if (selected === false || selected === null) {
+                        incorrectAnswers.push(`Pregunta ${questionCount + 1} del ${section.indicator}`);
                     }
-                } else {
-                    incorrectAnswers.push(index + 1);
-                }
+                    questionCount++;
+                });
             });
 
-            const endTime = new Date();
-            const timeTaken = Math.floor((endTime - startTime) / 1000);
-
-            const fullname = document.getElementById('fullname').value.trim();
-            const nie = document.getElementById('nie').value.trim();
-            const scorePercentage = (score / quizData.length) * 10;
-            const formattedTimeTaken = `${Math.floor(timeTaken / 60)} minutos y ${timeTaken % 60} segundos`;
-
-            // Show results in the modal
+            // Mostrar los resultados en el modal
             document.getElementById('modalName').innerText = `Nombre: ${fullname}`;
             document.getElementById('modalNIE').innerText = `NIE: ${nie}`;
-            document.getElementById('modalDetails').innerText = `Calificación obtenida: ${scorePercentage.toFixed(2)} / 10\nTiempo: ${formattedTimeTaken}\nUnidad: ${evaluationName}\nFecha: ${new Date().toLocaleString()}`;
-            document.getElementById('modalIncorrectAnswers').innerHTML = incorrectAnswers.map(num => `<div>Pregunta ${num}</div>`).join('');
-            document.getElementById('attemptCount').innerText = `Intento ${attempt + 1} de ${maxAttempts}`;
+            const modalIncorrectAnswers = document.getElementById('modalIncorrectAnswers');
+            modalIncorrectAnswers.innerHTML = '';
+            incorrectAnswers.forEach((questionNumber) => {
+                const div = document.createElement('div');
+                div.innerText = questionNumber;
+                modalIncorrectAnswers.appendChild(div);
+            });
+
+            // Mostrar detalles adicionales
+            const endTime = new Date();
+            const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+            const currentDate = new Date();
+            const modalDetails = document.getElementById('modalDetails');
+            modalDetails.innerHTML = `
+                Fecha: ${currentDate.toLocaleDateString()}<br>
+                Hora: ${currentDate.toLocaleTimeString()}<br>
+                Tiempo en realizar la prueba: ${timeTaken} segundos<br>
+                Nombre de la unidad: ${evaluationName}<br>
+                Calificación: ${((quizData.length * 5 - incorrectAnswers.length) / (quizData.length * 5) * 10).toFixed(2)}/10
+            `;
+
+            // Mostrar intentos de manipulación
             document.getElementById('manipulationCount').innerText = `Intentos de manipulación detectados: ${manipulationCount}`;
-            document.getElementById('resultModal').style.display = 'block';
+
+            // Mostrar contador de reintentos
+            document.getElementById('attemptCount').innerText = `Reintentos: ${attempt + 1}`;
+
+            const modal = document.getElementById('resultModal');
+            modal.style.display = 'block';
 
             attempt++;
             if (attempt >= maxAttempts) {
-                document.getElementById('submit').disabled = true;
+                alert('Has alcanzado el número máximo de intentos.');
             }
+        }
+
+        document.getElementById('submit').addEventListener('click', submitQuiz);
+
+        document.getElementById('startQuiz').addEventListener('click', function() {
+            const nie = document.getElementById('nie').value.trim();
+            if (!authorizedNIEs.includes(nie)) {
+                alert('NIE no autorizado.');
+                return;
+            }
+            document.querySelector('.quiz-container').style.display = 'block';
+            document.getElementById('infoModal').style.display = 'none';
+            startTime = new Date();
+            startTimer();
+            loadQuiz();
         });
 
-        document.querySelector('.close').addEventListener('click', () => {
+        // Modal close functionality
+        const closeModal = document.getElementsByClassName('close')[0];
+        closeModal.onclick = function() {
             document.getElementById('resultModal').style.display = 'none';
-        });
+        }
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('resultModal')) {
+                document.getElementById('resultModal').style.display = 'none';
+            }
+        }
+
+        document.addEventListener("contextmenu", function(e){
+            e.preventDefault();
+            updateCaptureCount();
+        }, false);
 
         function startTimer() {
-            timer = setInterval(() => {
+            timer = setInterval(function() {
                 timeLeft--;
+                const timerElement = document.getElementById('timer');
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+                seconds = seconds < 10 ? '0' + seconds : seconds;
+                timerElement.innerText = `${minutes}:${seconds}`;
+
+                if (timeLeft <= 600) {
+                    timerElement.style.backgroundColor = 'red';
+                } else if (timeLeft <= 1200) {
+                    timerElement.style.backgroundColor = 'orange';
+                } else {
+                    timerElement.style.backgroundColor = 'green';
+                }
+
                 if (timeLeft <= 0) {
                     clearInterval(timer);
-                    document.getElementById('submit').click();
-                } else {
-                    const minutes = Math.floor(timeLeft / 60);
-                    const seconds = timeLeft % 60;
-                    document.getElementById('timer').innerText = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-                    if (timeLeft <= 600 && timeLeft > 300) {
-                        document.getElementById('timer').style.backgroundColor = 'orange';
-                    } else if (timeLeft <= 300) {
-                        document.getElementById('timer').style.backgroundColor = 'red';
-                    }
+                    submitQuiz();
                 }
             }, 1000);
         }
 
-        // Deshabilitar clic derecho
-        document.addEventListener('contextmenu', (event) => event.preventDefault());
+        function updateCaptureCount() {
+            manipulationCount++;
+        }
 
-        // Deshabilitar copiar y pegar
-        document.addEventListener('copy', (event) => event.preventDefault());
-        document.addEventListener('paste', (event) => event.preventDefault());
-
-        // Monitor de cambios sospechosos
-        let originalQuizState = JSON.stringify([...document.querySelectorAll('input[type="radio"]')].map(input => input.checked));
-        setInterval(() => {
-            const currentQuizState = JSON.stringify([...document.querySelectorAll('input[type="radio"]')].map(input => input.checked));
-            if (originalQuizState !== currentQuizState) {
-                manipulationCount++;
-                originalQuizState = currentQuizState;
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                updateCaptureCount();
             }
-        }, 1000);
+        });
 
-        // Cargar el cuestionario
-        loadQuiz();
+        window.addEventListener('pagehide', function() {
+            updateCaptureCount();
+        });
+
+        window.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            updateCaptureCount();
+        });
+
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                updateCaptureCount();
+            }
+        });
+
+        window.onload = function() {
+            document.getElementById('infoModal').style.display = 'block';
+        }
     </script>
 </body>
 </html>
